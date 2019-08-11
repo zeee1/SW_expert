@@ -9,6 +9,7 @@ public class Solution {
     public static int count;
     public static int[][] map;
     public static boolean[][] visited;
+    public static int[][] recordL;
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner scanner = new Scanner(new FileInputStream("sample_input_1953.txt"));
@@ -24,6 +25,7 @@ public class Solution {
 
             map = new int[N][M];
             visited = new boolean[N][M];
+            recordL = new int[N][M];
 
             for(int k = 0 ; k < N; k++){
                 for(int p = 0; p < M; p++){
@@ -40,8 +42,11 @@ public class Solution {
     }
 
     public static void countAvailablePosition(Position pos, int restTime, int N, int M){
-        if(visited[pos.x][pos.y] == false)
+        if(visited[pos.x][pos.y] == false){
             count += 1;
+            recordL[pos.x][pos.y] = restTime;
+        }
+
 
         visited[pos.x][pos.y] = true;
 
@@ -87,6 +92,9 @@ public class Solution {
 
         for(int i = 0 ; i < nextPositionList.size(); i++){
             Position nextPos = nextPositionList.get(i);
+            if(visited[nextPos.x][nextPos.y] == true && recordL[nextPos.x][nextPos.y] > restTime-1){
+                continue;
+            }
             countAvailablePosition(nextPos, restTime-1,N, M);
         }
 
