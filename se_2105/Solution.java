@@ -7,15 +7,16 @@ import java.util.Scanner;
 
 public class Solution {
     public static int N;
+    public static int count;
     public static int[][] map;
     public static Position startPosition;
+    public static boolean[][] visited;
     public static int[] dx = {1, 1, -1, -1};
     public static int[] dy = {1, -1, -1, 1};
     public static boolean[] numberAppeared;
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new FileInputStream("sample_input_2105.txt"));
-        //Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         int testcaseNumber = scanner.nextInt();
 
@@ -23,6 +24,7 @@ public class Solution {
             N = scanner.nextInt();
 
             map = new int[N][N];
+            visited = new boolean[N][N];
 
             int maxNumber = 0;
 
@@ -35,75 +37,50 @@ public class Solution {
                 }
             }
 
+            numberAppeared = new boolean[maxNumber+1];
 
-            int maxLength = 0;
+            count = 0;
 
             for(int k = 0; k < N; k++){
-                for(int p = 1; p < N-1; p++){
-                    numberAppeared = new boolean[maxNumber];
+                for(int p = 0; p < N; p++){
                     startPosition = new Position(k, p);
-
-                    int count = solve(new Position(k, p), -1, 0);
-
-                    if(maxLength < count){
-                        maxLength = count;
-                    }
+                    visited[k][p] = true;
+                    numberAppeared[map[k][p]] = true;
+                    solve(new Position(k, p), 0, 1);
+                    visited[k][p] = false;
+                    numberAppeared[map[k][p]] = false;
                 }
             }
-
-            if(maxLength == 0)
-                maxLength = -1;
-            System.out.println("#"+i+" "+maxLength);
+            if(count<4) count = -1;
+            System.out.println("#"+i+" "+count);
         }
     }
 
-    public static int solve(Position pos, int prevDirection, int length){
-        int currentValue = map[pos.x][pos.y];
-        numberAppeared[currentValue-1] = true;
-        int nextX;
-        int nextY;
-        int directionRange = 0;
+    public static void solve(Position pos, int prevDirection, int length){
+        if(prevDirection == 4)
+            return ;
 
-        ArrayList<Position> nextPositionList = new ArrayList<>();
+        int nextX = pos.x + dx[prevDirection];
+        int nextY = pos.y +dy[prevDirection];
 
-        if(prevDirection == -1){
-            prevDirection = 0;
-            directionRange = 0;
-        }else if(prevDirection == 3){
-            directionRange = 3;
-        }
-        else{
-            directionRange = prevDirection+1;
+        if(nextX < 0 || nextX >= N || nextY < 0 || nextY >= N){
+            return ;
         }
 
-        for(int i = prevDirection ; i <= directionRange; i++){
-            nextX = pos.x+dx[i];
-            nextY = pos.y+dy[i];
-
-            if(nextX == startPosition.x && nextY == startPosition.y){
-                return length+1;
-            }
-            if(nextX < 0 || nextX >= N || nextY < 0 || nextY >= N || numberAppeared[map[nextX][nextY]-1] == true){
-                prevDirection+=1;
-                continue;
-            }
-
-            nextPositionList.add(new Position(nextX, nextY));
+        if(visited[nextX][nextY]||numberAppeared[map[nextX][nextY]]){
+            if(nextX == startPosition.x && nextY == startPosition.y)
+                count = Math.max(count, length);
+            return;
         }
 
-        int maxLength = 0;
+        visited[nextX][nextY] = true;
+        numberAppeared[map[nextX][nextY]] = true;
 
-        for(int i = 0 ; i < nextPositionList.size(); i++){
+        solve(new Position(nextX, nextY), prevDirection, length+1);
+        solve(new Position(nextX, nextY), prevDirection+1, length+1);
 
-            int result = solve(nextPositionList.get(i), prevDirection+i, length+1);
-
-            if (result > maxLength){
-                maxLength = result;
-            }
-        }
-
-        numberAppeared[map[pos.x][pos.y]-1] = false;
-        return maxLength;
+        numberAppeared[map[nextX][nextY]] = false;
+        visited[nextX][nextY] = false;
     }
 }
 
