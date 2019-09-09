@@ -9,13 +9,14 @@ public class Solution {
     public static int W;
     public static int K;
     public static int[][] filmCell;
-    public static int answer = Integer.MAX_VALUE;
+    public static int answer;
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner scanner = new Scanner(new FileInputStream("sample_input_2112.txt"));
         int testcaseNumber = scanner.nextInt();
 
         for(int i = 0 ; i < testcaseNumber; i++){
+            answer = Integer.MAX_VALUE;
             D = scanner.nextInt();
             W = scanner.nextInt();
             K = scanner.nextInt();
@@ -28,33 +29,40 @@ public class Solution {
                 }
             }
 
-            solve(0,0);
-            System.out.println(answer);
-            break;
+            answer = solve(0,0);
+            System.out.println("#"+(i+1)+" "+answer);
         }
     }
 
-    public static void solve(int currentIndex, int count){
+    public static int solve(int currentIndex, int count){
+        if(count >= answer){
+            return Integer.MAX_VALUE;
+        }
 
         if (check() == true){
             answer = Math.min(count, answer);
-            return ;
+            return answer;
         }
 
-        if (count == D){
-            answer = 0;
-            return ;
+        if (count == K){
+            return Integer.MAX_VALUE;
         }
 
         for(int i = currentIndex; i < filmCell.length; i++){
             int[] originalCellValues = changeIndexCell(i, 0);
-            solve(i, count+1);
+            int tmp = solve(i, count+1);
             recoverOriginalCell(i, originalCellValues);
 
             originalCellValues = changeIndexCell(i, 1);
-            solve(i, count+1);
+            int tmp2 = solve(i, count+1);
             recoverOriginalCell(i, originalCellValues);
+
+            answer = Math.min(answer, tmp);
+            answer = Math.min(answer, tmp2);
+
         }
+
+        return answer;
     }
 
     public static int[] changeIndexCell(int index, int changeNumber){
