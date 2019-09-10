@@ -29,7 +29,25 @@ public class Solution {
                 }
             }
 
-            answer = solve(0,0);
+            if(check() != true){
+                for(int k = 0; k < D; k++){
+                    int[] originalCellValues = changeIndexCell(k, 0);
+                    int tmp = solve(k, 1);
+                    recoverOriginalCell(k, originalCellValues);
+
+                    originalCellValues = changeIndexCell(k, 1);
+                    int tmp2 = solve(k, 1);
+                    recoverOriginalCell(k, originalCellValues);
+
+                    answer = Math.min(tmp, answer);
+                    answer = Math.min(tmp2, answer);
+
+                }
+            }else{
+                answer = 0;
+            }
+
+
             System.out.println("#"+(i+1)+" "+answer);
         }
     }
@@ -38,6 +56,8 @@ public class Solution {
         if(count >= answer){
             return Integer.MAX_VALUE;
         }
+
+
 
         if (check() == true){
             answer = Math.min(count, answer);
@@ -48,12 +68,25 @@ public class Solution {
             return Integer.MAX_VALUE;
         }
 
-        for(int i = currentIndex; i < filmCell.length; i++){
+        for(int i = currentIndex+1; i < filmCell.length; i++){
             int[] originalCellValues = changeIndexCell(i, 0);
+
+//            if(currentIndex == i){
+//                if(check() == true){
+//                    return Math.min(count, answer);
+//                }
+//            }
+
             int tmp = solve(i, count+1);
             recoverOriginalCell(i, originalCellValues);
 
             originalCellValues = changeIndexCell(i, 1);
+
+//            if(currentIndex == i){
+//                if(check() == true){
+//                    return Math.min(count, answer);
+//                }
+//            }
             int tmp2 = solve(i, count+1);
             recoverOriginalCell(i, originalCellValues);
 
@@ -83,17 +116,13 @@ public class Solution {
 
     public static boolean check(){
         boolean flag = false;
-        int[] cells = new int[D];
-        for (int i = 0 ; i < W ; i++){
-            for(int j = 0; j < D ; j++){
-                cells[j] = filmCell[j][i];
-            }
 
+        for (int i = 0 ; i < W ; i++){
             int prev_value = -1;
             int sequenced_count = 1;
 
-            for(int p = 0 ; p < D; p++){
-                if (prev_value == cells[p]){
+            for(int j = 0; j < D ; j++){
+                if (prev_value == filmCell[j][i]){
                     sequenced_count += 1;
                 }
                 else{
@@ -105,7 +134,7 @@ public class Solution {
                     break;
                 }
 
-                prev_value = cells[p];
+                prev_value = filmCell[j][i];
             }
 
             if (flag == false){
