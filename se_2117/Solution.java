@@ -33,31 +33,28 @@ public class Solution {
 
             for(int k = 0 ; k < N; k++){
                 for(int p = 0; p < N; p++){
-                    int result = solve(new Position(k, p),1);
-                    answer = Math.max(answer, result);
+                    solve(new Position(k, p),1);
                 }
             }
 
             System.out.println("#"+i+" "+answer);
-
-            if(i == 2)
-                break;
         }
     }
 
-    public static int solve(Position center, int K){
-        if (K >= N)
-            return -1;
+    public static void solve(Position center, int K){
+        if (K > N+1)
+            return;
 
         houseCount = countHouse(center, K);
         securityCost = K*K +(K-1)*(K-1);
         cost = houseCount*M-securityCost;
 
-        int subresult = solve(center, K+1);
-        
-        int result = Math.max(houseCount, subresult);
+        if (cost >= 0){
+            answer = Math.max(houseCount, answer);
 
-        return result;
+        }
+
+        solve(center, K+1);
     }
 
     public static int countHouse(Position center, int K){
