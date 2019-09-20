@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Solution {
     public static int N;
+    public static microbe[][] maxValue;
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner scanner = new Scanner(new FileInputStream("sample_input_2382.txt"));
@@ -19,6 +21,7 @@ public class Solution {
             N = scanner.nextInt();
             int M = scanner.nextInt();
             int K = scanner.nextInt();
+            maxValue = new microbe[N][N];
 
             microbe[][] cell = new microbe[N][N];
             ArrayDeque<microbe> microbes = new ArrayDeque<>();
@@ -29,8 +32,8 @@ public class Solution {
                 int number = scanner.nextInt();
                 int direction = scanner.nextInt();
 
-                cell[x][y] = new microbe(x, y, number, direction);
-                microbes.add(new microbe(x, y, number, direction));
+                cell[x][y] = new microbe(x, y, number, direction, 0);
+                microbes.add(new microbe(x, y, number, direction, 0));
             }
 
             int result = solve(M, cell, microbes);
@@ -40,15 +43,14 @@ public class Solution {
     }
 
     public static int solve(int M, microbe[][] cell, ArrayDeque<microbe> microbes){
-        for(int i = 0 ; i < M; i++){
-            for(int j = 0 ; j < microbes.size(); j++){
+        for(int i = 1 ; i <= M; i++){
+            int queueSize = microbes.size();
+            for(int j = 0 ; j < queueSize; j++){
                 microbe poppedmicrobe = microbes.poll();
                 int x = poppedmicrobe.x;
                 int y = poppedmicrobe.y;
                 int number = poppedmicrobe.number;
                 int direction = poppedmicrobe.direction;
-                int prev_x = x;
-                int prev_y = y;
 
                 if(poppedmicrobe.direction == 1) { //up
                     x -=1;
@@ -83,25 +85,45 @@ public class Solution {
                 }
 
                 if(cell[x][y] != null){
-
-                    cell[x][y] = new microbe(x, y, number, direction);
-                    microbes.add(new microbe(x, y, number, direction));
-
-                    if(cell[x][y].number < number){
-                        cell[x][y].direction = direction;
+                    if(cell[x][y].time < i){
+                        cell[x][y] = new microbe(x, y, number, direction, i);
+                        maxValue[x][y] = new microbe(x, y, number, direction, i);
+                        microbes.add(new microbe(x, y, number, direction, i));
                     }
-                    cell[x][y].number += number;
+                    else{
+                        microbe maxValueMicrobe = maxValue[x][y];
+                        if(maxValueMicrobe.number < number){
+                            maxValueMicrobe.number = number;
+                            maxValueMicrobe.direction = direction;
+                            cell[x][y].direction = direction;
+                        }
+                        cell[x][y].number += number;
+
+                        Iterator<microbe> element = microbes.iterator();
+                        while(element.hasNext()){
+                            microbe nextElement = element.next();
+                            if (nextElement.x == x && nextElement.y == y && nextElement.time == i){
+                                nextElement.number = cell[x][y].number;
+                                nextElement.direction = cell[x][y].direction;
+                                break;
+                            }
+                        }
+                    }
+
+
                 }
                 else{
-                    cell[x][y] = new microbe(x, y, number, direction);
-                    microbes.add(new microbe(x, y, number, direction));
+                    cell[x][y] = new microbe(x, y, number, direction, i);
+                    maxValue[x][y] = new microbe(x, y, number, direction, i);
+                    microbes.add(new microbe(x, y, number, direction, i));
                 }
-                cell[prev_x][prev_y] = null;
             }
         }
+
         int result = 0;
-        for(int i = 0 ; i < microbes.size(); i++){
-            result += microbes.pop().number;
+        int queueSize = microbes.size();
+        for(int i = 0 ; i < queueSize; i++){
+            result += microbes.poll().number;
         }
 
         return result;
@@ -114,11 +136,13 @@ class microbe{
     public int y;
     public int number;
     public int direction;
+    public int time;
 
-    public microbe(int x, int y, int number, int direction) {
+    public microbe(int x, int y, int number, int direction, int time) {
         this.x = x;
         this.y = y;
         this.number = number;
         this.direction = direction;
+        this.time = time;
     }
 }
