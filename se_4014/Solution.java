@@ -48,8 +48,10 @@ public class Solution {
                     flag = false;
                     break;
                 }
+                else if(diff == 1){
+                    duration = 1;
+                }
                 else if(diff == -1){
-                    duration = 0;
                     for(int k = j ; k < j+X; k++){
                         if(k >= map.length || map[i][k] != map[i][j])
                         {
@@ -59,6 +61,10 @@ public class Solution {
                     }
                     if(!flag)
                         break;
+                    else{
+                        j = j+X-1;
+                        duration =1;
+                    }
                 }
             }
 
@@ -91,8 +97,10 @@ public class Solution {
                     flag = false;
                     break;
                 }
+                else if(diff == 1){
+                    duration  = 1;
+                }
                 else if(diff == -1){
-                    duration = 0;
                     for(int k = j ; k < j+X; k++){
                         if(k >= map.length || tmp[j] != tmp[k])
                         {
@@ -102,6 +110,10 @@ public class Solution {
                     }
                     if(!flag)
                         break;
+                    else{
+                        j = j+X-1;
+                        duration =1;
+                    }
                 }
             }
 
