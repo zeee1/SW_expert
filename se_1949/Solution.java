@@ -6,115 +6,118 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Solution {
-    public static int K = 0;
-    public static boolean Kused = false;
+    public static int N;
+    public static int K;
     public static int[][] map;
-    public static boolean[][] visited;
+    public static boolean[][] isVisit;
+    public static int peekHeight = 0;
+    public static boolean Kused;
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner scanner = new Scanner(new FileInputStream("sample_input_1949.txt"));
 
         int testcaseNumber = scanner.nextInt();
 
-        for (int i = 0; i < testcaseNumber; i++) {
-            int N = scanner.nextInt();
+        for(int i = 1; i <= testcaseNumber ; i++){
+            N = scanner.nextInt();
             K = scanner.nextInt();
+            Kused = false;
 
             map = new int[N][N];
-            visited = new boolean[N][N];
-            int peekHeight = 0;
+            isVisit = new boolean[N][N];
 
-            for (int j = 0; j < N; j++) {
-                for (int p = 0; p < N; p++) {
-                    map[j][p] = scanner.nextInt();
+            for(int j = 0 ; j < N ; j++){
+                for(int k = 0 ; k < N ; k++){
+                    map[j][k] = scanner.nextInt();
 
-                    if (peekHeight < map[j][p]) {
-                        peekHeight = map[j][p];
+                    if(map[j][k] > peekHeight){
+                        peekHeight = map[j][k];
                     }
                 }
             }
-
-            solve(i, map, visited, N, K, peekHeight);
+            solve(i);
+            peekHeight = 0;
         }
+
     }
 
-    public static void solve(int index, int[][] map, boolean[][] visited, int N, int K, int peekHeight) {
+    public static void solve(int index){
         ArrayList<Position> peekList = new ArrayList<>();
 
-        for (int k = 0; k < N; k++) {
-            for (int p = 0; p < N; p++) {
-                if (map[k][p] == peekHeight) {
-                    peekList.add(new Position(k, p));
+        for(int i = 0 ; i < N ; i++){
+            for(int j = 0 ; j < N ; j++){
+                if(map[i][j] == peekHeight){
+                    peekList.add(new Position(i, j));
                 }
             }
         }
 
-        int result = 0;
+        int maxAnswer = 0;
+        for(int i = 0 ; i < peekList.size(); i++){
+            int answer = dfs(peekList.get(i));
 
-        for (int k = 0; k < peekList.size(); k++) {
-            int tmp = DFSSearching(peekList.get(k), map, visited);
-            if (result < tmp){
-                result = tmp;
+            if(answer > maxAnswer){
+                maxAnswer = answer;
             }
         }
-        System.out.println("#"+(index+1)+" "+result);
+
+        System.out.println("#"+index+" "+maxAnswer);
     }
 
-    public static int DFSSearching(Position pos,int[][] map, boolean[][] visited){
+    public static int dfs(Position pos){
         int answer = 1;
-        visited[pos.x][pos.y] = true;
+        int prevAnswer = 0;
+        int currentX = pos.x;
+        int currentY = pos.y;
+        isVisit[currentX][currentY] = true;
 
-        int[] directX = {-1, 1, 0, 0};
-        int[] directY = {0, 0, -1, 1};
-        int prev_answer = 0;
+        int[] dx = {-1, 1, 0, 0}; // up, down, left, right
+        int[] dy = {0, 0, -1, 1}; //
 
-        for(int i = 0 ; i < 4 ; i++){
+        for(int i = 0 ; i < 4; i++){
+            int tmpAnswer= 1;
 
-            int nextX = pos.x + directX[i];
-            int nextY = pos.y + directY[i];
+            int nextX = currentX + dx[i];
+            int nextY = currentY + dy[i];
 
-            if(nextX < 0 || nextX >= map.length || nextY < 0 || nextY >= map.length)
-            {
+            if(nextX < 0 || nextY < 0 || nextX == N || nextY == N || isVisit[nextX][nextY] == true){
                 continue;
             }
 
-            if(map[pos.x][pos.y] > map[nextX][nextY]  && visited[nextX][nextY] == false)
-            {
-                answer = DFSSearching(new Position(nextX, nextY), map, visited)+1;
+            int tmpAnswer1 = 1;
+            if(map[nextX][nextY] < map[currentX][currentY]){
+                tmpAnswer1 = dfs(new Position(nextX, nextY))+1;
             }
 
-            else if(Kused == false && map[pos.x][pos.y] > map[nextX][nextY]-K && visited[nextX][nextY] == false)
-            {
+            int tmpAnswer2 = 1;
+            if(Kused == false && map[nextX][nextY] > map[currentX][currentY]-K){
                 Kused = true;
-                int tmp = map[nextX][nextY];
-                int prev_result = 0;
+                int nextHeight = map[nextX][nextY];
+                int maxResult = 0;
 
                 for(int p = 1 ; p <= K ; p++){
-                    map[nextX][nextY] = map[pos.x][pos.y]-p;
-                    answer = DFSSearching(new Position(nextX, nextY), map, visited)+1;
+                    map[nextX][nextY] -= p;
 
-                    if(prev_result > answer){
-                        answer = prev_result;
+                    if(map[nextX][nextY] < map[currentX][currentY]) {
+                        int a = dfs(new Position(nextX, nextY))+1;
+                        maxResult = Math.max(maxResult, a);
                     }
 
-                    prev_result = answer;
+                    map[nextX][nextY] = nextHeight;
                 }
 
-                map[nextX][nextY] = tmp;
+                tmpAnswer2 = maxResult;
                 Kused = false;
             }
 
-            if (prev_answer > answer)
-                answer = prev_answer;
-
-            prev_answer = answer;
+            tmpAnswer = Math.max(tmpAnswer1, tmpAnswer2);
+            answer = Math.max(prevAnswer, tmpAnswer);
+            prevAnswer = answer;
         }
 
-        visited[pos.x][pos.y] = false;
+        isVisit[currentX][currentY] = false;
         return answer;
     }
-
-
 }
 
 class Position{
